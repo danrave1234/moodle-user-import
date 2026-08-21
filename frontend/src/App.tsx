@@ -12,7 +12,7 @@ type AppState =
   | { status: 'idle' }
   | { status: 'selected'; file: File }
   | { status: 'previewing'; file: File }
-  | { status: 'preview'; file: File; preview: ImportPreview; cached: boolean }
+  | { status: 'preview'; file: File; preview: ImportPreview }
   | { status: 'importing'; file: File; preview: ImportPreview }
   | { status: 'complete'; file: File; result: ImportResultData }
   | { status: 'error'; file: File; message: string; preview?: ImportPreview }
@@ -36,8 +36,8 @@ export default function App() {
 
     setState({ status: 'previewing', file: selectedFile })
     try {
-      const { preview, cached } = await previewUsers(selectedFile)
-      setState({ status: 'preview', file: selectedFile, preview, cached })
+      const preview = await previewUsers(selectedFile)
+      setState({ status: 'preview', file: selectedFile, preview })
     } catch (error) {
       setState({ status: 'error', file: selectedFile, message: errorMessage(error) })
     }
@@ -127,7 +127,7 @@ export default function App() {
             <div className="alert alert--error" role="alert">
               <div><strong>We couldn’t finish that step</strong><p>{state.message}</p></div>
               {state.preview && (
-                <button className="button button--secondary" type="button" onClick={() => setState({ status: 'preview', file: state.file, preview: state.preview!, cached: false })}>
+                <button className="button button--secondary" type="button" onClick={() => setState({ status: 'preview', file: state.file, preview: state.preview! })}>
                   Back to preview
                 </button>
               )}
@@ -137,9 +137,6 @@ export default function App() {
           {(state.status === 'preview' || state.status === 'importing') && (
             <section className="preview-section">
               <ImportSummary summary={state.preview.summary} />
-              {state.status === 'preview' && state.cached && (
-                <p className="cache-note" role="status">Showing a recent preview of this file.</p>
-              )}
               <ImportTable rows={state.preview.rows} />
               <div className="import-bar">
                 <div>

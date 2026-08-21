@@ -136,8 +136,6 @@ h2 { margin-bottom: 0; color: var(--navy); font-size: 22px; letter-spacing: -.02
 .summary-card--success strong { color: var(--success); }
 .summary-card--danger { border-color: #f4c5c0; background: var(--danger-bg); }
 .summary-card--danger strong { color: var(--danger); }
-.cache-note { margin: -8px 0 16px; color: var(--muted); font-size: 13px; }
-
 .table-shell { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th { padding: 12px 14px; color: var(--muted); background: var(--surface-muted); font-size: 12px; letter-spacing: .04em; text-align: left; text-transform: uppercase; }

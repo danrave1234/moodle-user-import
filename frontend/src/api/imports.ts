@@ -1,46 +1,13 @@
 import type { ImportPreview, ImportResultData } from '../types/import'
 
-const PREVIEW_CACHE_TTL_MS = 30_000
-const PREVIEW_CACHE_LIMIT = 5
-
-type CacheEntry = {
-  expiresAt: number
-  preview: ImportPreview
-}
-
-type PreviewResponse = {
-  preview: ImportPreview
-  cached: boolean
-}
-
-const previewCache = new Map<string, CacheEntry>()
-
 export class ApiError extends Error {}
 
-export async function previewUsers(file: File): Promise<PreviewResponse> {
-  const key = fileKey(file)
-  const cached = previewCache.get(key)
-
-  if (cached && cached.expiresAt > Date.now()) {
-    return { preview: cached.preview, cached: true }
-  }
-
-  previewCache.delete(key)
-  const preview = await upload<ImportPreview>('/api/imports/preview', file)
-  rememberPreview(key, preview)
-
-  return { preview, cached: false }
+export async function previewUsers(file: File): Promise<ImportPreview> {
+  return upload<ImportPreview>('/api/imports/preview', file)
 }
 
 export async function importUsers(file: File): Promise<ImportResultData> {
-  const result = await upload<ImportResultData>('/api/imports', file)
-  clearPreviewCache()
-
-  return result
-}
-
-export function clearPreviewCache(): void {
-  previewCache.clear()
+  return upload<ImportResultData>('/api/imports', file)
 }
 
 async function upload<T>(url: string, file: File): Promise<T> {
@@ -65,21 +32,6 @@ async function upload<T>(url: string, file: File): Promise<T> {
   }
 
   return payload as T
-}
-
-function fileKey(file: File): string {
-  return `${file.name}:${file.size}:${file.lastModified}`
-}
-
-function rememberPreview(key: string, preview: ImportPreview): void {
-  if (previewCache.size >= PREVIEW_CACHE_LIMIT) {
-    const oldestKey = previewCache.keys().next().value
-    if (typeof oldestKey === 'string') {
-      previewCache.delete(oldestKey)
-    }
-  }
-
-  previewCache.set(key, { preview, expiresAt: Date.now() + PREVIEW_CACHE_TTL_MS })
 }
 
 function readErrorMessage(payload: unknown): string | null {
