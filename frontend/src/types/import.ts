@@ -31,5 +31,8 @@ export type ImportPreview = {
 
 export type ImportResultData = {
   summary: ImportSummary
-  rows: ImportRow[]
+  imported: ImportedUser[]
+  rejected: ImportRow[]
 }
+
+export type ImportedUser = Pick<ImportRow, 'rowNumber' | 'name' | 'surname' | 'email'>

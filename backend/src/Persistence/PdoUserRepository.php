@@ -44,7 +44,7 @@ final class PdoUserRepository implements UserRepository
     {
         $statement = $this->pdo->prepare(
             'INSERT INTO users (name, surname, email) VALUES (:name, :surname, :email) '
-            . 'ON CONFLICT (email) DO NOTHING',
+            . 'ON CONFLICT (email) DO NOTHING RETURNING email',
         );
         $statement->execute([
             'name' => $candidate->name,
@@ -52,7 +52,7 @@ final class PdoUserRepository implements UserRepository
             'email' => $candidate->email,
         ]);
 
-        return $statement->rowCount() === 1;
+        return $statement->fetchColumn() !== false;
     }
 
     public function commit(): void

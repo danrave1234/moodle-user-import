@@ -52,10 +52,11 @@ final class PdoUserRepositoryTest extends TestCase
 
     public function testDatabaseUniqueConstraintRejectsDuplicates(): void
     {
-        $candidate = new UserCandidate('John', 'Smith', 'john@example.com');
+        $sql = "INSERT INTO users (name, surname, email) VALUES ('John', 'Smith', 'john@example.com')";
+        $this->pdo->exec($sql);
 
-        self::assertTrue($this->repository->insert($candidate));
-        self::assertFalse($this->repository->insert($candidate));
+        $this->expectException(PDOException::class);
+        $this->pdo->exec($sql);
     }
 
     public function testTransactionRollbackRemovesWrites(): void

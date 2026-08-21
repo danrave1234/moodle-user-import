@@ -52,14 +52,28 @@ final readonly class UserImportService
     public function import(string $path): ImportResult
     {
         $preview = $this->preview($path);
-        $imported = 0;
+        $importedRows = [];
+        $rejectedRows = array_values(array_filter(
+            $preview->rows,
+            static fn (ProcessedRow $row): bool => !$row->isValid(),
+        ));
 
         $this->repository->beginTransaction();
 
         try {
             foreach ($preview->rows as $row) {
-                if ($row->isValid() && $this->repository->insert($row->candidate)) {
-                    ++$imported;
+                if (!$row->isValid()) {
+                    continue;
+                }
+
+                if ($this->repository->insert($row->candidate)) {
+                    $importedRows[] = $row;
+                } else {
+                    $rejectedRows[] = $row->withError(new ValidationError(
+                        'email',
+                        'conflict_during_import',
+                        'This email was added by another import before this row could be saved.',
+                    ));
                 }
             }
 
@@ -69,7 +83,7 @@ final readonly class UserImportService
             throw $exception;
         }
 
-        return new ImportResult($preview->rows, $imported);
+        return new ImportResult($preview->rows, $importedRows, $rejectedRows);
     }
 
     /**

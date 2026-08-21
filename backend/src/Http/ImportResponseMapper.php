@@ -24,7 +24,7 @@ final class ImportResponseMapper
         ];
     }
 
-    /** @return array{summary: array{total: int, valid: int, invalid: int, imported: int, skipped: int}, rows: list<array<string, mixed>>} */
+    /** @return array{summary: array{total: int, valid: int, invalid: int, imported: int, skipped: int}, imported: list<array<string, mixed>>, rejected: list<array<string, mixed>>} */
     public function result(ImportResult $result): array
     {
         return [
@@ -35,7 +35,19 @@ final class ImportResponseMapper
                 'imported' => $result->imported,
                 'skipped' => $result->skipped,
             ],
-            'rows' => array_map($this->row(...), $result->rows),
+            'imported' => array_map($this->importedRow(...), $result->importedRows),
+            'rejected' => array_map($this->row(...), $result->rejectedRows),
+        ];
+    }
+
+    /** @return array{rowNumber: int, name: string, surname: string, email: string} */
+    private function importedRow(ProcessedRow $row): array
+    {
+        return [
+            'rowNumber' => $row->rowNumber,
+            'name' => $row->candidate->name,
+            'surname' => $row->candidate->surname,
+            'email' => $row->candidate->email,
         ];
     }
 
