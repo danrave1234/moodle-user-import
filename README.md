@@ -208,14 +208,19 @@ Successful writes can be checked in three ways:
 2. Review the detailed output from the CLI import command.
 3. Run the PostgreSQL integration tests, which compare each result with the actual rows stored in PostgreSQL.
 
-For a manual database check, first move to the repository root where `compose.yaml` is located:
+#### Manual database verification on Windows
+
+Run these commands in PowerShell. The first command moves into the repository containing `compose.yaml`; the second ensures PostgreSQL is running; the third displays every imported user:
 
 ```powershell
 Set-Location "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import"
+docker compose up -d
 docker compose exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
 ```
 
-From any other directory, provide the Compose file explicitly:
+Expected result: PostgreSQL prints a table with the `id`, `name`, `surname`, and `email` columns. If it reports `no configuration file provided`, the terminal is not in the repository root; run the `Set-Location` command above first.
+
+Alternatively, this form works from any directory because it supplies the full path to `compose.yaml`:
 
 ```powershell
 docker compose -f "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import\compose.yaml" exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
