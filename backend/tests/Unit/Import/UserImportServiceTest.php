@@ -63,8 +63,25 @@ final class UserImportServiceTest extends TestCase
         self::assertSame(1, $result->valid);
         self::assertSame(1, $result->invalid);
         self::assertSame(1, $result->imported);
-        self::assertSame(0, $result->skipped);
+        self::assertSame(1, $result->skipped);
+        self::assertSame('john@example.com', $result->importedRows[0]->candidate->email);
+        self::assertSame('invalid_email', $result->rejectedRows[0]->errors[0]->code);
         self::assertSame(1, $repository->count());
+    }
+
+    public function testItReportsAnInsertConflictAsRejected(): void
+    {
+        $repository = new InMemoryUserRepository();
+        $repository->rejectInserts = true;
+
+        $result = $this->service($repository)->import($this->csv(
+            "name,surname,email\nJohn,Smith,john@example.com\n",
+        ));
+
+        self::assertSame(0, $result->imported);
+        self::assertSame(1, $result->skipped);
+        self::assertSame(2, $result->rejectedRows[0]->rowNumber);
+        self::assertSame('conflict_during_import', $result->rejectedRows[0]->errors[0]->code);
     }
 
     public function testPreviewPerformsNoWrites(): void

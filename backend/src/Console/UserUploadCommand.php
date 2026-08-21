@@ -109,9 +109,24 @@ final class UserUploadCommand extends Command
             ['Valid' => (string) $result->valid],
             ['Invalid' => (string) $result->invalid],
             ['Imported' => (string) $result->imported],
-            ['Skipped during import' => (string) $result->skipped],
+            ['Not imported' => (string) $result->skipped],
         );
-        $this->renderInvalidRows($io, $result->rows);
+        if ($result->importedRows !== []) {
+            $io->section('Imported users');
+            $io->table(
+                ['CSV row', 'Name', 'Surname', 'Email'],
+                array_map(
+                    static fn (ProcessedRow $row): array => [
+                        $row->rowNumber,
+                        $row->candidate->name,
+                        $row->candidate->surname,
+                        $row->candidate->email,
+                    ],
+                    $result->importedRows,
+                ),
+            );
+        }
+        $this->renderInvalidRows($io, $result->rejectedRows);
     }
 
     /** @param list<ProcessedRow> $rows */

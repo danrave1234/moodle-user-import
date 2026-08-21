@@ -155,7 +155,7 @@ td { padding: 14px; border-top: 1px solid var(--border); vertical-align: top; }
 .import-bar p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
 .import-bar .button { min-width: 160px; }
 
-.result-panel { max-width: 720px; margin: 0 auto; padding: 52px; text-align: center; }
+.result-panel { max-width: 960px; margin: 0 auto; padding: 52px; text-align: center; }
 .result-check { display: grid; place-items: center; width: 58px; height: 58px; margin: 0 auto 20px; border-radius: 50%; color: white; background: var(--success); }
 .result-check svg { width: 31px; height: 31px; }
 .result-panel > p:not(.eyebrow) { max-width: 520px; margin: 12px auto 26px; color: var(--muted); line-height: 1.6; }
@@ -163,6 +163,10 @@ td { padding: 14px; border-top: 1px solid var(--border); vertical-align: top; }
 .result-stats div { padding: 16px; background: var(--surface-subtle); }
 .result-stats dt { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; }
 .result-stats dd { margin: 4px 0 0; color: var(--navy); font-size: 24px; font-weight: 800; }
+.result-detail-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 4px 12px; margin-top: 12px; }
+.result-details { margin-top: 24px; text-align: left; }
+.result-details h3 { margin: 0 0 12px; color: var(--navy); font-size: 17px; }
+.result-details .table-shell { background: var(--surface); }
 
 .visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; margin: -1px; padding: 0; border: 0; clip: rect(0 0 0 0); white-space: nowrap; }
 

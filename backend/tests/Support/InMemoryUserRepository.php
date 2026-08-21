@@ -17,6 +17,7 @@ final class InMemoryUserRepository implements UserRepository
     private ?array $snapshot = null;
 
     public bool $failOnInsert = false;
+    public bool $rejectInserts = false;
 
     /** @param list<UserCandidate> $users */
     public function __construct(array $users = [])
@@ -43,6 +44,10 @@ final class InMemoryUserRepository implements UserRepository
     {
         if ($this->failOnInsert) {
             throw new RuntimeException('Simulated database failure.');
+        }
+
+        if ($this->rejectInserts) {
+            return false;
         }
 
         if (isset($this->users[$candidate->email])) {

@@ -106,7 +106,7 @@ Open `http://localhost:5173`. Vite proxies `/api` requests to `http://localhost:
 2. Select **Preview users**.
 3. Review summary counts and row-level messages.
 4. Select **Import X users**. The button stays disabled until preview succeeds and at least one row is valid.
-5. Review the final imported and not-imported counts.
+5. Review the final imported and not-imported counts. Expand **View imported users** or **View rejected rows** to verify the exact normalized records and rejection reasons from this operation.
 
 The UI keeps the original browser `File` object and uploads it again for import. It never sends normalized preview rows as trusted input.
 
@@ -122,6 +122,25 @@ php user_upload.php --file ../examples/users.csv
 ```
 
 `--dry-run` performs parsing, normalization, validation, and database duplicate reads with zero writes. Invalid CSV records are normal reported results; unreadable input, invalid arguments, or infrastructure failures return a non-zero exit code.
+
+On Windows PowerShell, open a terminal in the repository and run:
+
+```powershell
+docker compose up -d
+Set-Location backend
+php user_upload.php --help
+php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
+php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv"
+```
+
+If `php` is not on `PATH` on this machine, use the installed executable directly:
+
+```powershell
+& "$env:LOCALAPPDATA\Programs\php83\php.exe" user_upload.php --help
+& "$env:LOCALAPPDATA\Programs\php83\php.exe" user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
+```
+
+The regular import command prints the confirmed imported users and all rejected rows with their original CSV row numbers and reasons. `--create-table` rebuilds the table and deletes its existing data, so reserve it for an intentional reset.
 
 ## API
 
@@ -164,6 +183,20 @@ npm run build
 ```
 
 GitHub Actions runs formatting, PHPStan level 8, PHPUnit against PostgreSQL, ESLint, Vitest, and the production frontend build on pushes and pull requests.
+
+### Verifying an import
+
+Successful writes can be checked in three ways:
+
+1. Expand the imported and rejected detail sections on the final browser screen.
+2. Review the detailed output from the CLI import command.
+3. Run the PostgreSQL integration tests, which compare each result with the actual rows stored in PostgreSQL.
+
+For a manual database check using the configured Compose service:
+
+```powershell
+docker compose exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
+```
 
 ## Design decisions
 
