@@ -12,8 +12,9 @@ use App\Http\UploadedCsvValidator;
 use Slim\Factory\AppFactory;
 use Slim\Psr7\Factory\ResponseFactory;
 
-/** @var ApplicationServices $services */
-$services = require dirname(__DIR__) . '/bootstrap.php';
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+$services = static fn (): ApplicationServices => require dirname(__DIR__) . '/bootstrap.php';
 
 $app = AppFactory::create();
 $responder = new JsonResponder();
@@ -21,13 +22,13 @@ $uploadValidator = new UploadedCsvValidator();
 $mapper = new ImportResponseMapper();
 
 $app->post('/api/imports/preview', new PreviewImportAction(
-    $services->userImportService,
+    $services,
     $uploadValidator,
     $mapper,
     $responder,
 ));
 $app->post('/api/imports', new ImportUsersAction(
-    $services->userImportService,
+    $services,
     $uploadValidator,
     $mapper,
     $responder,
