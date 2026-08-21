@@ -5,6 +5,7 @@ backend/vendor/
 frontend/node_modules/
 frontend/dist/
 .phpunit.cache/
+.phpstan-cache/
 .php-cs-fixer.cache
 coverage/
 *.log
@@ -12,4 +13,3 @@ coverage/
 .vscode/
 .DS_Store
 Thumbs.db
-
