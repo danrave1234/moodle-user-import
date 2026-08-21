@@ -123,6 +123,22 @@ php user_upload.php --file ../examples/users.csv
 
 `--dry-run` performs parsing, normalization, validation, and database duplicate reads with zero writes. Invalid CSV records are normal reported results; unreadable input, invalid arguments, or infrastructure failures return a non-zero exit code.
 
+### Browser and CLI workflow
+
+The browser and CLI use the same `UserImportService`, so normalization, validation, duplicate checks, transactions, and confirmed database writes are identical. Their confirmation flow is intentionally different:
+
+- The browser previews the file and pauses until the user selects **Import**.
+- The CLI is non-interactive. `--dry-run` is the preview command, while the command without `--dry-run` revalidates the original CSV and imports immediately.
+
+For a review-before-import CLI workflow, run these as two explicit commands:
+
+```powershell
+php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
+php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv"
+```
+
+The second command never trusts cached dry-run output. It processes the CSV again so database changes that occurred after preview are handled safely. Its final output lists only PostgreSQL-confirmed inserts as imported and reports every rejected row with its original CSV row number and reason.
+
 On Windows PowerShell, open a terminal in the repository and run:
 
 ```powershell
