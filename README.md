@@ -1,10 +1,8 @@
 # Moodle User Import
 
-A small production-style application for previewing and importing users from CSV. It provides a clear React workflow for non-technical users and a Symfony Console CLI for administrators. Both adapters share the same typed PHP application service, so parsing, normalization, validation, duplicate handling, and database writes behave consistently.
+A CSV user-import application with a React web UI, PHP/Slim API, Symfony Console CLI, and PostgreSQL database. The web and CLI adapters share the same import business logic.
 
-The implementation deliberately stays within the coding challenge's controlled scope: one CSV workflow, one PostgreSQL table, two HTTP endpoints, and one CLI command. Preview rows are read-only; features such as editable previews are documented under [Future improvements](#future-improvements), not added to the core submission.
-
-## What it does
+## Features
 
 - Accepts `name`, `surname`, and `email` CSV columns in any order; extra columns are ignored.
 - Trims values, title-cases names with multibyte-safe functions, and lowercases email addresses.
@@ -12,7 +10,7 @@ The implementation deliberately stays within the coding challenge's controlled s
 - Previews valid and invalid users before importing.
 - Reprocesses the original file during import instead of trusting browser preview data.
 - Uses a transaction and PostgreSQL `UNIQUE` constraint with conflict-safe inserts.
-- Supports browser and CLI dry-run workflows with clear loading and error states.
+- Supports browser preview and CLI dry-run workflows with clear loading and error states.
 
 ## Architecture
 
@@ -35,13 +33,22 @@ CLI ---------+
                      PostgreSQL
 ```
 
-`UserImportService` orchestrates a streamed `CsvReader`, `UserNormalizer`, `UserValidator`, and `UserRepository`. Slim actions and the Symfony command only validate transport input, call the service, and format results. SQL stays inside `PdoUserRepository`.
+`UserImportService` owns the shared parsing, normalization, validation, duplicate checking, and transaction workflow. Slim actions and the Symfony command are adapters; persistence is isolated behind `UserRepository` and `PdoUserRepository`.
+
+## Technology
+
+- **Backend:** PHP 8.3+, Slim 4, Symfony Console, League CSV, PDO
+- **Database:** PostgreSQL
+- **Frontend:** React, TypeScript, Vite
+- **Testing and quality:** PHPUnit, PHPStan, PHP-CS-Fixer, Vitest, React Testing Library, ESLint
+- **Local development:** Docker Compose
+- **CI:** GitHub Actions
 
 ## Requirements
 
 - PHP 8.3 or newer with `mbstring`, `PDO`, and `pdo_pgsql`
 - Composer 2
-- Node.js 24 LTS and npm
+- Node.js 24 LTS and npm (tested development version)
 - Docker Desktop or Docker Engine with Compose (for local PostgreSQL)
 
 The committed lock files pin exact PHP and JavaScript dependencies.
@@ -70,7 +77,7 @@ Copy-Item .env.example .env
 
 The Compose initialization creates separate `user_import` and `user_import_test` databases. The normal development database is never used by integration tests.
 
-### Environment configuration
+### Database configuration
 
 ```dotenv
 DB_HOST=127.0.0.1
@@ -108,7 +115,7 @@ Open `http://localhost:5173`. Vite proxies `/api` requests to `http://localhost:
 4. Select **Import X users**. The button stays disabled until preview succeeds and at least one row is valid.
 5. Review the final imported and not-imported counts. Expand **View imported users** or **View rejected rows** to verify the exact normalized records and rejection reasons from this operation.
 
-The UI keeps the original browser `File` object and uploads it again for import. It never sends normalized preview rows as trusted input.
+Import uploads and reprocesses the original CSV; preview rows are never submitted as trusted input.
 
 ## CLI
 
@@ -121,42 +128,12 @@ php user_upload.php --file ../examples/users.csv --dry-run
 php user_upload.php --file ../examples/users.csv
 ```
 
-`--dry-run` performs parsing, normalization, validation, and database duplicate reads with zero writes. Invalid CSV records are normal reported results; unreadable input, invalid arguments, or infrastructure failures return a non-zero exit code.
+- `--help` displays command usage and options.
+- `--create-table` rebuilds the users table and deletes its current data.
+- `--dry-run` parses, normalizes, validates, and checks database duplicates without writing.
+- `--file` without `--dry-run` processes the CSV again and imports valid records.
 
-### Browser and CLI workflow
-
-The browser and CLI use the same `UserImportService`, so normalization, validation, duplicate checks, transactions, and confirmed database writes are identical. Their confirmation flow is intentionally different:
-
-- The browser previews the file and pauses until the user selects **Import**.
-- The CLI is non-interactive. `--dry-run` is the preview command, while the command without `--dry-run` revalidates the original CSV and imports immediately.
-
-For a review-before-import CLI workflow, run these as two explicit commands:
-
-```powershell
-php user_upload.php --file ../examples/users.csv --dry-run
-php user_upload.php --file ../examples/users.csv
-```
-
-The second command never trusts previous dry-run output. It processes the CSV again so database changes that occurred after preview are handled safely. Its final output lists only PostgreSQL-confirmed inserts as imported and reports every rejected row with its original CSV row number and reason.
-
-On Windows PowerShell, open a terminal in the repository and run:
-
-```powershell
-docker compose up -d
-Set-Location backend
-php user_upload.php --help
-php user_upload.php --file ../examples/users.csv --dry-run
-php user_upload.php --file ../examples/users.csv
-```
-
-If PowerShell cannot find `php`, install PHP 8.3 or newer with the required extensions and add its installation directory to `PATH`. Confirm the setup before continuing:
-
-```powershell
-php --version
-php -m | Select-String -Pattern "mbstring|pdo_pgsql"
-```
-
-The regular import command prints the confirmed imported users and all rejected rows with their original CSV row numbers and reasons. `--create-table` rebuilds the table and deletes its existing data, so reserve it for an intentional reset.
+Dry-run and import are separate CLI commands. Import does not trust earlier dry-run output; it revalidates the file and reports confirmed inserts and rejected rows.
 
 ## API
 
@@ -176,8 +153,9 @@ cd backend
 composer test
 composer analyse
 composer cs:check
-composer cs:fix
 ```
+
+Use `composer cs:fix` to apply formatting fixes during development.
 
 To include PostgreSQL integration tests locally, set these variables before `composer test`:
 
@@ -198,26 +176,13 @@ npm run test
 npm run build
 ```
 
-GitHub Actions runs formatting, PHPStan level 8, PHPUnit against PostgreSQL, ESLint, Vitest, and the production frontend build on pushes and pull requests.
+GitHub Actions runs the equivalent formatting, static-analysis, test, lint, and build checks. PostgreSQL integration tests verify results against stored rows.
 
-### Verifying an import
+Optionally inspect imported users from the repository root:
 
-Successful writes can be checked in three ways:
-
-1. Expand the imported and rejected detail sections on the final browser screen.
-2. Review the detailed output from the CLI import command.
-3. Run the PostgreSQL integration tests, which compare each result with the actual rows stored in PostgreSQL.
-
-#### Manual database verification on Windows
-
-Open PowerShell in the cloned repository root—the directory containing `compose.yaml`—then run:
-
-```powershell
-docker compose up -d
+```bash
 docker compose exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
 ```
-
-Expected result: PostgreSQL prints a table with the `id`, `name`, `surname`, and `email` columns. If it reports `no configuration file provided`, change into your own cloned repository directory and rerun the commands.
 
 ## Design decisions
 
@@ -235,17 +200,11 @@ HTTP and CLI must agree. A single service owns normalization order, validation, 
 
 ### Why import revalidates the file
 
-Preview data can become stale or be modified in a browser. Import sends and processes the original CSV again, keeping the backend authoritative without server-side sessions or staging tables.
+Preview data and database state can become stale. Preview and import independently process the original CSV, keeping the backend authoritative. HTTP responses use `Cache-Control: no-store`.
 
 ### Why PostgreSQL still has a unique constraint
 
 Application checks provide useful preview feedback. The unique database constraint remains the final integrity guarantee, and `ON CONFLICT DO NOTHING` safely handles a concurrent insert between preview and import.
-
-### Loading and request consistency
-
-The UI has explicit `idle`, `selected`, `previewing`, `preview`, `importing`, `complete`, and `error` states. Buttons are disabled during work, progress text is announced, and failures retain enough state to retry or return to the preview.
-
-Preview requests always upload and reprocess the selected file; the frontend deliberately does not cache previews using file metadata. Import independently uploads and revalidates the same original browser `File`, so the backend remains authoritative if file or database state changes. API responses use `Cache-Control: no-store` so browsers and shared caches do not retain user data.
 
 ### Large CSV trade-off
 
@@ -253,7 +212,7 @@ League CSV iterates source records instead of loading the raw file at once. The 
 
 ## Assumptions
 
-- A header row is required. Header names are trimmed and matched case-insensitively.
+- A header row is required. Header names are trimmed and matched case-insensitively; headers that collide after normalization are rejected.
 - Blank CSV fields are returned as row validation errors rather than parser failures.
 - Duplicate comparison happens after email normalization. The first occurrence can remain valid; later occurrences are marked `duplicate_in_file`.
 - A race-time unique conflict is counted as skipped, while unexpected database failures roll back the transaction.
@@ -261,14 +220,6 @@ League CSV iterates source records instead of loading the raw file at once. The 
 
 ## Future improvements
 
-These are intentionally outside the controlled challenge scope:
-
-- Editable preview rows, with explicit edited-data submission and complete server-side revalidation before import.
 - Pagination or virtualized rendering for very large previews.
-- Configurable upload limits and operational metrics based on real production requirements.
-- Staging or background processing for imports that exceed synchronous request limits.
-- End-to-end browser tests for deployment environments in addition to the current behavior tests.
-
-## Repository conventions
-
-Development starts from `main` and is implemented on `feat/user-import-application`. Commits use Conventional Commit-style subjects and represent verified, logical slices rather than a single generated snapshot. Runtime secrets, dependencies, build output, temporary uploads, and IDE files are ignored; both lock files are committed.
+- Configurable upload and row limits based on deployment requirements.
+- Staged or background processing when imports exceed synchronous request limits.
