@@ -208,10 +208,17 @@ Successful writes can be checked in three ways:
 2. Review the detailed output from the CLI import command.
 3. Run the PostgreSQL integration tests, which compare each result with the actual rows stored in PostgreSQL.
 
-For a manual database check using the configured Compose service:
+For a manual database check, first move to the repository root where `compose.yaml` is located:
 
 ```powershell
+Set-Location "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import"
 docker compose exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
+```
+
+From any other directory, provide the Compose file explicitly:
+
+```powershell
+docker compose -f "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import\compose.yaml" exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
 ```
 
 ## Design decisions
