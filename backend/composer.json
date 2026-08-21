@@ -1,0 +1,43 @@
+{
+  "name": "danrave/moodle-user-import",
+  "description": "CSV user import API and CLI for the Moodle coding challenge.",
+  "type": "project",
+  "license": "proprietary",
+  "require": {
+    "php": "^8.3",
+    "ext-mbstring": "*",
+    "ext-pdo": "*",
+    "ext-pdo_pgsql": "*",
+    "league/csv": "^9.28",
+    "slim/psr7": "^1.8",
+    "slim/slim": "^4.15",
+    "symfony/console": "^7.4",
+    "vlucas/phpdotenv": "^5.6"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.89",
+    "phpstan/phpstan": "^2.1",
+    "phpunit/phpunit": "^11.5"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit",
+    "analyse": "phpstan analyse --memory-limit=512M",
+    "cs:check": "php-cs-fixer fix --dry-run --diff",
+    "cs:fix": "php-cs-fixer fix"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {}
+  }
+}
+

@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+backend/vendor/
+frontend/node_modules/
+frontend/dist/
+.phpunit.cache/
+.php-cs-fixer.cache
+coverage/
+*.log
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
