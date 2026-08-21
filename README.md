@@ -133,8 +133,8 @@ The browser and CLI use the same `UserImportService`, so normalization, validati
 For a review-before-import CLI workflow, run these as two explicit commands:
 
 ```powershell
-php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
-php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv"
+php user_upload.php --file ../examples/users.csv --dry-run
+php user_upload.php --file ../examples/users.csv
 ```
 
 The second command never trusts cached dry-run output. It processes the CSV again so database changes that occurred after preview are handled safely. Its final output lists only PostgreSQL-confirmed inserts as imported and reports every rejected row with its original CSV row number and reason.
@@ -145,15 +145,15 @@ On Windows PowerShell, open a terminal in the repository and run:
 docker compose up -d
 Set-Location backend
 php user_upload.php --help
-php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
-php user_upload.php --file "C:\Users\Danrave\Downloads\users.csv"
+php user_upload.php --file ../examples/users.csv --dry-run
+php user_upload.php --file ../examples/users.csv
 ```
 
-If `php` is not on `PATH` on this machine, use the installed executable directly:
+If PowerShell cannot find `php`, install PHP 8.3 or newer with the required extensions and add its installation directory to `PATH`. Confirm the setup before continuing:
 
 ```powershell
-& "$env:LOCALAPPDATA\Programs\php83\php.exe" user_upload.php --help
-& "$env:LOCALAPPDATA\Programs\php83\php.exe" user_upload.php --file "C:\Users\Danrave\Downloads\users.csv" --dry-run
+php --version
+php -m | Select-String -Pattern "mbstring|pdo_pgsql"
 ```
 
 The regular import command prints the confirmed imported users and all rejected rows with their original CSV row numbers and reasons. `--create-table` rebuilds the table and deletes its existing data, so reserve it for an intentional reset.
@@ -210,21 +210,14 @@ Successful writes can be checked in three ways:
 
 #### Manual database verification on Windows
 
-Run these commands in PowerShell. The first command moves into the repository containing `compose.yaml`; the second ensures PostgreSQL is running; the third displays every imported user:
+Open PowerShell in the cloned repository root—the directory containing `compose.yaml`—then run:
 
 ```powershell
-Set-Location "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import"
 docker compose up -d
 docker compose exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
 ```
 
-Expected result: PostgreSQL prints a table with the `id`, `name`, `surname`, and `email` columns. If it reports `no configuration file provided`, the terminal is not in the repository root; run the `Set-Location` command above first.
-
-Alternatively, this form works from any directory because it supplies the full path to `compose.yaml`:
-
-```powershell
-docker compose -f "C:\Users\Danrave\Desktop\Career\Coding Challenges\moodle-user-import\compose.yaml" exec postgres psql -U user_import -d user_import -c "SELECT id, name, surname, email FROM users ORDER BY id;"
-```
+Expected result: PostgreSQL prints a table with the `id`, `name`, `surname`, and `email` columns. If it reports `no configuration file provided`, change into your own cloned repository directory and rerun the commands.
 
 ## Design decisions
 
