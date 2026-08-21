@@ -31,4 +31,3 @@ function SummaryCard({ label, value, tone }: { label: string; value: number; ton
     </div>
   )
 }
-

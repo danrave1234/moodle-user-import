@@ -64,6 +64,7 @@ h2 { margin-bottom: 0; color: var(--navy); font-size: 22px; letter-spacing: -.02
 
 .button { display: inline-flex; min-height: 42px; align-items: center; justify-content: center; gap: 9px; padding: 9px 16px; border: 1px solid transparent; border-radius: 8px; font-size: 14px; font-weight: 750; transition: background .15s, border-color .15s, box-shadow .15s; }
 .button:focus-visible, input:focus-visible { outline: 3px solid rgba(232, 95, 12, .28); outline-offset: 2px; }
+.visually-hidden:focus-visible + .button { outline: 3px solid rgba(232, 95, 12, .28); outline-offset: 2px; }
 .button--primary { color: white; background: var(--orange); }
 .button--primary:hover:not(:disabled) { background: var(--orange-dark); }
 .button--primary:disabled { background: #b8bec8; }
@@ -145,4 +146,3 @@ td { padding: 14px; border-top: 1px solid #e8ebef; vertical-align: top; }
   .result-panel { padding: 36px 20px; }
   .result-stats { grid-template-columns: 1fr; }
 }
-

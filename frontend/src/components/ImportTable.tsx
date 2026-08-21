@@ -51,4 +51,3 @@ export function ImportTable({ rows }: ImportTableProps) {
     </div>
   )
 }
-

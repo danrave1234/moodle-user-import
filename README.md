@@ -73,7 +73,6 @@ The Compose initialization creates separate `user_import` and `user_import_test`
 ### Environment configuration
 
 ```dotenv
-APP_ENV=development
 DB_HOST=127.0.0.1
 DB_PORT=5432
 DB_NAME=user_import
@@ -219,4 +218,3 @@ These are intentionally outside the controlled challenge scope:
 ## Repository conventions
 
 Development starts from `main` and is implemented on `feat/user-import-application`. Commits use Conventional Commit-style subjects and represent verified, logical slices rather than a single generated snapshot. Runtime secrets, dependencies, build output, temporary uploads, and IDE files are ignored; both lock files are committed.
-

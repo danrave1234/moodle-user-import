@@ -33,4 +33,3 @@ export type ImportResultData = {
   summary: ImportSummary
   rows: ImportRow[]
 }
-

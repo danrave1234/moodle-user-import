@@ -36,9 +36,6 @@ export function CsvDropzone({ file, disabled, onFile }: CsvDropzoneProps) {
         <p className="dropzone__title">Drop your CSV file here</p>
         <p className="dropzone__help">or choose it from your computer</p>
       </div>
-      <label className="button button--secondary" htmlFor={inputId}>
-        Choose CSV file
-      </label>
       <input
         id={inputId}
         className="visually-hidden"
@@ -51,6 +48,9 @@ export function CsvDropzone({ file, disabled, onFile }: CsvDropzoneProps) {
           event.target.value = ''
         }}
       />
+      <label className="button button--secondary" htmlFor={inputId}>
+        Choose CSV file
+      </label>
       {file && (
         <div className="selected-file" aria-live="polite">
           <span className="selected-file__name">{file.name}</span>
@@ -66,4 +66,3 @@ function formatFileSize(bytes: number): string {
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
-

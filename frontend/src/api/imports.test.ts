@@ -39,4 +39,3 @@ describe('preview cache', () => {
     expect(fetch).toHaveBeenCalledTimes(1)
   })
 })
-

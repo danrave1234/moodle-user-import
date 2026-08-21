@@ -97,4 +97,3 @@ function readErrorMessage(payload: unknown): string | null {
 
   return null
 }
-

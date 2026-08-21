@@ -95,4 +95,3 @@ function mockResponse(preview: ImportPreview): void {
     headers: { 'Content-Type': 'application/json' },
   }))
 }
-

@@ -160,4 +160,3 @@ function Step({ number, label, active }: { number: string; label: string; active
 function errorMessage(error: unknown): string {
   return error instanceof ApiError ? error.message : 'Something went wrong. Please try again.'
 }
-
