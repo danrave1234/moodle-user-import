@@ -20,6 +20,7 @@ final class LeagueCsvReader implements CsvReader
 
         try {
             $csv = Reader::from($path, 'r');
+            $csv->setEscape('');
             $csv->setHeaderOffset(0);
             $headerMap = $this->headerMap($csv->getHeader());
 
@@ -48,6 +49,9 @@ final class LeagueCsvReader implements CsvReader
         foreach ($headers as $header) {
             $key = mb_strtolower(trim($header), 'UTF-8');
             if ($key !== '') {
+                if (isset($normalized[$key])) {
+                    throw new CsvReadException("CSV headers are ambiguous after normalization: {$key}.");
+                }
                 $normalized[$key] = $header;
             }
         }
