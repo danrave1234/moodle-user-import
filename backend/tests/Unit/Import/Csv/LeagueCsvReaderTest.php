@@ -55,6 +55,15 @@ final class LeagueCsvReaderTest extends TestCase
         iterator_to_array((new LeagueCsvReader())->read($path));
     }
 
+    public function testItRejectsHeadersThatCollideAfterNormalization(): void
+    {
+        $path = $this->csv("name,surname,Email,email\nJohn,Smith,first@example.com,second@example.com\n");
+
+        $this->expectException(CsvReadException::class);
+        $this->expectExceptionMessage('ambiguous after normalization: email');
+        iterator_to_array((new LeagueCsvReader())->read($path));
+    }
+
     /** @return list<RawUserRow> */
     private function read(string $contents): array
     {

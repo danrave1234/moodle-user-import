@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http;
 
-use App\Import\UserImportService;
+use App\ApplicationServices;
+use Closure;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
@@ -12,7 +13,7 @@ use Psr\Http\Message\UploadedFileInterface;
 final readonly class PreviewImportAction
 {
     public function __construct(
-        private UserImportService $service,
+        private Closure $services,
         private UploadedCsvValidator $uploadValidator,
         private ImportResponseMapper $mapper,
         private JsonResponder $responder,
@@ -26,8 +27,13 @@ final readonly class PreviewImportAction
             throw new HttpInputException('Choose a CSV file to preview.');
         }
 
-        $preview = $this->service->preview($this->uploadValidator->path($file));
+        $preview = $this->services()->userImportService->preview($this->uploadValidator->path($file));
 
         return $this->responder->respond($response, $this->mapper->preview($preview));
+    }
+
+    private function services(): ApplicationServices
+    {
+        return ($this->services)();
     }
 }

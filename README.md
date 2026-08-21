@@ -137,7 +137,7 @@ php user_upload.php --file ../examples/users.csv --dry-run
 php user_upload.php --file ../examples/users.csv
 ```
 
-The second command never trusts cached dry-run output. It processes the CSV again so database changes that occurred after preview are handled safely. Its final output lists only PostgreSQL-confirmed inserts as imported and reports every rejected row with its original CSV row number and reason.
+The second command never trusts previous dry-run output. It processes the CSV again so database changes that occurred after preview are handled safely. Its final output lists only PostgreSQL-confirmed inserts as imported and reports every rejected row with its original CSV row number and reason.
 
 On Windows PowerShell, open a terminal in the repository and run:
 
@@ -165,7 +165,7 @@ POST /api/imports/preview   multipart/form-data field: file
 POST /api/imports           multipart/form-data field: file
 ```
 
-Row validation returns HTTP 200 with structured errors. Missing uploads, non-CSV files, or invalid CSV structure return a consistent JSON error with a 4xx status. Unexpected errors return a generic 5xx response without stack traces or credentials.
+Row validation returns HTTP 200 with structured errors. Missing uploads, non-CSV files, or invalid CSV structure return a consistent JSON error with a 4xx status. A database connection failure returns a sanitized JSON `503`; unexpected failures return a generic `500` without stack traces, DSNs, or credentials.
 
 ## Quality checks
 
@@ -241,11 +241,11 @@ Preview data can become stale or be modified in a browser. Import sends and proc
 
 Application checks provide useful preview feedback. The unique database constraint remains the final integrity guarantee, and `ON CONFLICT DO NOTHING` safely handles a concurrent insert between preview and import.
 
-### Loading and caching
+### Loading and request consistency
 
 The UI has explicit `idle`, `selected`, `previewing`, `preview`, `importing`, `complete`, and `error` states. Buttons are disabled during work, progress text is announced, and failures retain enough state to retry or return to the preview.
 
-Successful previews are cached in memory for 30 seconds, up to five file fingerprints, to avoid accidental repeated uploads in the same tab. The cache is cleared after import. Because database state can change, import always revalidates; API responses also send `Cache-Control: no-store` so browsers and shared caches do not retain user data.
+Preview requests always upload and reprocess the selected file; the frontend deliberately does not cache previews using file metadata. Import independently uploads and revalidates the same original browser `File`, so the backend remains authoritative if file or database state changes. API responses use `Cache-Control: no-store` so browsers and shared caches do not retain user data.
 
 ### Large CSV trade-off
 

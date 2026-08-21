@@ -2,7 +2,6 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import App from './App'
-import { clearPreviewCache } from './api/imports'
 import type { ImportPreview } from './types/import'
 
 const validRow = {
@@ -16,7 +15,6 @@ const validRow = {
 
 describe('User import', () => {
   beforeEach(() => {
-    clearPreviewCache()
     localStorage.removeItem('user-import-theme')
     delete document.documentElement.dataset.theme
     vi.restoreAllMocks()

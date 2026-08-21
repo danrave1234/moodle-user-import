@@ -59,6 +59,17 @@ final class PdoUserRepositoryTest extends TestCase
         $this->pdo->exec($sql);
     }
 
+    public function testInsertReturnsFalseForAConflictAndStoresOnlyOneRow(): void
+    {
+        $candidate = new UserCandidate('John', 'Smith', 'john@example.com');
+
+        self::assertTrue($this->repository->insert($candidate));
+        self::assertFalse($this->repository->insert($candidate));
+        $statement = $this->pdo->query('SELECT COUNT(*) FROM users');
+        self::assertNotFalse($statement);
+        self::assertSame(1, (int) $statement->fetchColumn());
+    }
+
     public function testTransactionRollbackRemovesWrites(): void
     {
         $this->repository->beginTransaction();
