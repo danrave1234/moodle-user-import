@@ -17,7 +17,19 @@ const validRow = {
 describe('User import', () => {
   beforeEach(() => {
     clearPreviewCache()
+    localStorage.removeItem('user-import-theme')
+    delete document.documentElement.dataset.theme
     vi.restoreAllMocks()
+  })
+
+  it('switches between light and dark mode', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Switch to dark mode' }))
+
+    expect(document.documentElement.dataset.theme).toBe('dark')
+    expect(screen.getByRole('button', { name: 'Switch to light mode' })).toBeInTheDocument()
   })
 
   it('lets a user choose a CSV file', async () => {

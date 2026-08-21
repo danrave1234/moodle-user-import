@@ -1,4 +1,5 @@
 import { useId, useState, type DragEvent } from 'react'
+import { FileCsvIcon } from './icons'
 
 type CsvDropzoneProps = {
   file?: File
@@ -31,7 +32,7 @@ export function CsvDropzone({ file, disabled, onFile }: CsvDropzoneProps) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
     >
-      <div className="upload-mark" aria-hidden="true">CSV</div>
+      <div className="upload-mark" aria-hidden="true"><FileCsvIcon /></div>
       <div>
         <p className="dropzone__title">Drop your CSV file here</p>
         <p className="dropzone__help">or choose it from your computer</p>

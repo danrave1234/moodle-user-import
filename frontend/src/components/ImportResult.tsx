@@ -1,4 +1,5 @@
 import type { ImportResultData } from '../types/import'
+import { CheckCircleIcon } from './icons'
 
 type ImportResultProps = {
   result: ImportResultData
@@ -10,7 +11,7 @@ export function ImportResult({ result, onReset }: ImportResultProps) {
 
   return (
     <section className="result-panel" aria-labelledby="result-heading" aria-live="polite">
-      <div className="result-check" aria-hidden="true">✓</div>
+      <div className="result-check" aria-hidden="true"><CheckCircleIcon /></div>
       <p className="eyebrow">Import complete</p>
       <h2 id="result-heading">
         {summary.imported} {summary.imported === 1 ? 'user was' : 'users were'} imported

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ApiError, importUsers, previewUsers } from './api/imports'
 import { CsvDropzone } from './components/CsvDropzone'
 import { ImportResult } from './components/ImportResult'
 import { ImportSummary } from './components/ImportSummary'
 import { ImportTable } from './components/ImportTable'
+import { MoonIcon, SunIcon, UsersIcon } from './components/icons'
 import type { ImportPreview, ImportResultData } from './types/import'
 import './styles.css'
 
@@ -18,8 +19,14 @@ type AppState =
 
 export default function App() {
   const [state, setState] = useState<AppState>({ status: 'idle' })
+  const [theme, setTheme] = useState<Theme>(initialTheme)
   const file = 'file' in state ? state.file : undefined
   const isBusy = state.status === 'previewing' || state.status === 'importing'
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    localStorage.setItem('user-import-theme', theme)
+  }, [theme])
 
   const handlePreview = async (selectedFile: File) => {
     if (!selectedFile.name.toLowerCase().endsWith('.csv')) {
@@ -49,12 +56,21 @@ export default function App() {
   return (
     <main>
       <header className="page-header">
-        <div className="brand-mark" aria-hidden="true">M</div>
+        <div className="brand-mark" aria-hidden="true"><UsersIcon /></div>
         <div>
           <p className="eyebrow">User administration</p>
           <h1>User Import</h1>
           <p className="page-intro">Add users in three clear steps: choose a CSV, review it, then import.</p>
         </div>
+        <button
+          className="theme-toggle"
+          type="button"
+          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+        >
+          {theme === 'light' ? <MoonIcon aria-hidden="true" /> : <SunIcon aria-hidden="true" />}
+          <span>{theme === 'light' ? 'Dark mode' : 'Light mode'}</span>
+        </button>
       </header>
 
       <ol className="steps" aria-label="Import progress">
@@ -146,6 +162,17 @@ export default function App() {
       )}
     </main>
   )
+}
+
+type Theme = 'light' | 'dark'
+
+function initialTheme(): Theme {
+  const savedTheme = localStorage.getItem('user-import-theme')
+  if (savedTheme === 'light' || savedTheme === 'dark') {
+    return savedTheme
+  }
+
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
 function Step({ number, label, active }: { number: string; label: string; active: boolean }) {
