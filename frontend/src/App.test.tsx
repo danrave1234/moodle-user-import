@@ -38,7 +38,10 @@ describe('User import', () => {
 
     await user.upload(screen.getByLabelText('Choose CSV file'), csvFile())
 
+    expect(screen.getByText('Your file is ready to preview')).toBeInTheDocument()
     expect(screen.getByText('users.csv')).toBeInTheDocument()
+    expect(screen.getByText('CSV file · 46 B')).toBeInTheDocument()
+    expect(screen.getByLabelText('Replace file')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Preview users' })).toBeEnabled()
   })
 

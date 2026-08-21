@@ -1,5 +1,5 @@
 import { useId, useState, type DragEvent } from 'react'
-import { FileCsvIcon } from './icons'
+import { CheckCircleIcon, FileCsvIcon } from './icons'
 
 type CsvDropzoneProps = {
   file?: File
@@ -32,10 +32,22 @@ export function CsvDropzone({ file, disabled, onFile }: CsvDropzoneProps) {
       onDragLeave={() => setDragging(false)}
       onDrop={handleDrop}
     >
-      <div className="upload-mark" aria-hidden="true"><FileCsvIcon /></div>
-      <div>
-        <p className="dropzone__title">Drop your CSV file here</p>
-        <p className="dropzone__help">or choose it from your computer</p>
+      <div className={`upload-mark${file ? ' upload-mark--selected' : ''}`} aria-hidden="true">
+        {file ? <CheckCircleIcon /> : <FileCsvIcon />}
+      </div>
+      <div className="dropzone__content">
+        {file ? (
+          <>
+            <p className="dropzone__title">Your file is ready to preview</p>
+            <p className="selected-file__name" title={file.name}>{file.name}</p>
+            <p className="dropzone__help">CSV file · {formatFileSize(file.size)}</p>
+          </>
+        ) : (
+          <>
+            <p className="dropzone__title">Drop your CSV file here</p>
+            <p className="dropzone__help">or choose it from your computer</p>
+          </>
+        )}
       </div>
       <input
         id={inputId}
@@ -50,14 +62,8 @@ export function CsvDropzone({ file, disabled, onFile }: CsvDropzoneProps) {
         }}
       />
       <label className="button button--secondary" htmlFor={inputId}>
-        Choose CSV file
+        {file ? 'Replace file' : 'Choose CSV file'}
       </label>
-      {file && (
-        <div className="selected-file" aria-live="polite">
-          <span className="selected-file__name">{file.name}</span>
-          <span>{formatFileSize(file.size)}</span>
-        </div>
-      )}
     </div>
   )
 }
